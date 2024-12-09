@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体育场地份子钱计算器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        textarea {
+            width: calc(100% - 22px);
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7f7f7;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .negative-payment {
+            background-color: #ffcccc; /* 淡红色 */
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        .summary p {
+            margin: 0;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>长工乒乓球份子钱计算器</h1>
+        <textarea id="inputText" placeholder="请粘贴微信接龙文本...
+      本站点可识别【接龙昵称】【空格和中英文逗号】
+      作者：https://github.com/Den-ze"></textarea><br>
+        <button onclick="calculateFees()">计算份子钱</button>
+
+        <div class="summary" id="summary" style="display:none;">
+            <p>总人数: <span id="totalPeople"></span></p>
+            <p>合计费用: <span id="totalCost"></span></p>
+            <p>定台人数: <span id="bookedTables"></span></p>
+            <p>均摊金额: <span id="averageCost"></span></p>
+        </div>
+
+        <table id="resultTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>应支付金额</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function calculateFees() {
+            const inputText = document.getElementById('inputText').value.trim();
+            const lines = inputText.split('\n');
+            let totalFee = 0;
+            let results = [];
+            let bookedCount = 0;
+
+            lines.forEach(line => {
+                const parts = line.split(/[\s，,]+/);
+                if (parts.length >= 2) {
+                    const name = parts.slice(1).join(' ').trim();
+                    const feeStr = parts[parts.length - 1].trim();
+                    const fee = parseFloat(feeStr);
+
+                    if (!isNaN(fee)) {
+                        totalFee += fee;
+                        bookedCount++;
+                        results.push({ name, fee });
+                    } else {
+                        results.push({ name, fee: 0 });
+                    }
+                }
+            });
+
+            const averageFee = totalFee / results.length;
+
+            const resultBody = document.getElementById('resultBody');
+            resultBody.innerHTML = '';
+
+            results.forEach((item, index) => {
+                const row = document.createElement('tr');
+                let payAmount;
+                if (item.fee > 0) {
+                    payAmount = averageFee - item.fee;
+                } else {
+                    payAmount = averageFee;
+                }
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${payAmount.toFixed(2)}</td>
+                `;
+                
+                if (payAmount < 0) {
+                    row.classList.add('negative-payment');
+                }
+
+                resultBody.appendChild(row);
+            });
+
+            document.getElementById('totalPeople').textContent = results.length;
+            document.getElementById('totalCost').textContent = `${totalFee.toFixed(2)}`;
+            document.getElementById('bookedTables').textContent = bookedCount;
+            document.getElementById('averageCost').textContent = `${averageFee.toFixed(2)}`;
+
+            document.getElementById('summary').style.display = 'block';
+            document.getElementById('resultTable').style.display = 'table';
+        }
+    </script>
+</body>
+</html>
+
+
+
